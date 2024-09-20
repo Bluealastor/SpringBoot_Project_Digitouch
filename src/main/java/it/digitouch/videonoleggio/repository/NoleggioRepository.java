@@ -1,6 +1,6 @@
-package com.example.demo.repository;
+package it.digitouch.videonoleggio.repository;
 
-import com.example.demo.model.NoleggioModel;
+import it.digitouch.videonoleggio.model.NoleggioModel;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
