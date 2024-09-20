@@ -5,105 +5,58 @@ import it.digitouch.videonoleggio.exception.ElementNotFoundException;
 import it.digitouch.videonoleggio.model.FilmModel;
 import it.digitouch.videonoleggio.repository.FilmRepository;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
+import org.springframework.stereotype.Service;
+import org.modelmapper.ModelMapper;
+
 import java.util.List;
 
 @Service
+@Slf4j @Data
 @RequiredArgsConstructor
-@Slf4j
-@Data
 public class FilmService {
 
     private final FilmRepository filmRepository;
 
+    private final ModelMapper modelMapper;
+
     public List<FilmDTO> getAllFilms() {
-        List<FilmModel> filmModels = filmRepository.findAll();
-        List<FilmDTO> filmDTOs = new ArrayList<>();
-
-        // Itera su ogni film e converto in DTO
-        for (FilmModel filmModel : filmModels) {
-            FilmDTO filmDTO = new FilmDTO(
-                    filmModel.getId(),
-                    filmModel.getNome(),
-                    filmModel.getCasaProduzione(),
-                    filmModel.getGenere(),
-                    filmModel.getAnnouscita(),
-                    filmModel.getHashFilm()
-            );
-            filmDTOs.add(filmDTO);
-        }
-
-        return filmDTOs;
+        List<FilmModel> filmList = filmRepository.findAll();
+        return filmList.stream().map(((film) -> modelMapper.map(film, FilmDTO.class))).toList();
     }
 
-
     public FilmDTO saveFilm(FilmDTO filmDTO) {
-        FilmModel filmModel = new FilmModel(
-                filmDTO.getId(),
-                filmDTO.getNome(),
-                filmDTO.getCasaProduzione(),
-                filmDTO.getGenere(),
-                filmDTO.getAnnouscita(),
-                filmDTO.getHashFilm()
-        );
-        FilmModel savedFilm = filmRepository.save(filmModel);
-        return new FilmDTO(
-                savedFilm.getId(),
-                savedFilm.getNome(),
-                savedFilm.getCasaProduzione(),
-                savedFilm.getGenere(),
-                savedFilm.getAnnouscita(),
-                savedFilm.getHashFilm()
-        );
+        FilmModel film = modelMapper.map(filmDTO, FilmModel.class);
+        filmRepository.save(film);
+        return modelMapper.map(film, FilmDTO.class);
     }
 
     public FilmDTO getFilmById(Long id) {
         FilmModel filmModel = filmRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Film non trovato"));
-        return new FilmDTO(
-                filmModel.getId(),
-                filmModel.getNome(),
-                filmModel.getCasaProduzione(),
-                filmModel.getGenere(),
-                filmModel.getAnnouscita(),
-                filmModel.getHashFilm()
-        );
+        return modelMapper.map(filmModel, FilmDTO.class);
     }
 
     public void deleteFilmById(Long id) {
         filmRepository.deleteById(id);
     }
 
-    public FilmDTO updateFilm(Long id, FilmDTO filmDTO) {
-        FilmModel existingFilm = filmRepository.findById(id)
+    public FilmDTO updateFilm(Long id, FilmDTO filmDTO) {    // Trova il film nel database
+        FilmModel filmModel = filmRepository.findById(id)
                 .orElseThrow(() -> new ElementNotFoundException("Film non trovato"));
-        existingFilm.setNome(filmDTO.getNome());
-        existingFilm.setCasaProduzione(filmDTO.getCasaProduzione());
-        existingFilm.setGenere(filmDTO.getGenere());
-        existingFilm.setAnnouscita(filmDTO.getAnnouscita());
-        existingFilm.setHashFilm(filmDTO.getHashFilm());
-        filmRepository.save(existingFilm);
-        return convertToDTO(existingFilm);
-    }
+        filmModel.setNome(filmDTO.getNome());
+        filmModel.setCasaProduzione(filmDTO.getCasaProduzione());
+        filmModel.setGenere(filmDTO.getGenere());
+        filmModel.setAnnouscita(filmDTO.getAnnouscita());
+        filmModel.setHashFilm(filmDTO.getHashFilm());
 
+        // Salva il film aggiornato nel repository
+        filmRepository.save(filmModel);
 
-
-
-    private FilmDTO convertToDTO(FilmModel filmModel) {
-        return new FilmDTO(
-                filmModel.getId(),
-                filmModel.getNome(),
-                filmModel.getCasaProduzione(),
-                filmModel.getGenere(),
-                filmModel.getAnnouscita(),
-                filmModel.getHashFilm()
-        );
+        // Ritorna il film aggiornato come DTO
+        return modelMapper.map(filmModel, FilmDTO.class);
     }
 }

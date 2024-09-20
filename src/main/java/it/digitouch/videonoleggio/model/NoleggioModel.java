@@ -1,7 +1,7 @@
 package it.digitouch.videonoleggio.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 import java.io.Serializable;
 
@@ -16,16 +16,19 @@ public class NoleggioModel implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotNull
+     /*******************************************************************************************
+     * UTILIZZO PER LE STRINGHE NOTBLANK in modo da evitare spazi vuoti all'inizio o alla fine  *
+     *******************************************************************************************/
+    @NotBlank
     private String nome;
 
-    @NotNull
+    @NotBlank
     private String titolare;
 
-    @NotNull
+    @NotBlank
     private String citta;
 
-    @NotNull
+    @NotBlank
     private String hashNoleggio;
 
     public NoleggioModel(Long id) {

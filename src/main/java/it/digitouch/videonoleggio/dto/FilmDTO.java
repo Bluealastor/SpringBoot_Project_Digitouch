@@ -1,10 +1,13 @@
 package it.digitouch.videonoleggio.dto;
 
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+import lombok.Data;
 
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class FilmDTO {
     private Long id;
     private String nome;

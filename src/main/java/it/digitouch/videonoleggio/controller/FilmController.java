@@ -41,7 +41,7 @@ public class FilmController {
         }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<FilmDTO> updateFilm(@PathVariable Long id, @RequestBody FilmDTO filmDTO) {
+    public ResponseEntity<FilmDTO> updateFilm(@PathVariable Long id, @Valid @RequestBody FilmDTO filmDTO) {
         FilmDTO updatedFilm = filmService.updateFilm(id, filmDTO);
         return ResponseEntity.ok(updatedFilm);
     }

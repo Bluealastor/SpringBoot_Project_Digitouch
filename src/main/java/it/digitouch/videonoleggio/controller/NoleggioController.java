@@ -16,10 +16,10 @@ public class NoleggioController {
 
     private final NoleggioService noleggioService;
 
+    //TODO GODO PARTE 2
     @GetMapping()
     public ResponseEntity<List<NoleggioDTO>> getAllNoleggi(){
-        List<NoleggioDTO> noleggi = noleggioService.getAllNoleggi();
-        return ResponseEntity.ok(noleggi) ;
+        return ResponseEntity.ok(noleggioService.getAllNoleggi()) ;
     }
 
     @PostMapping()

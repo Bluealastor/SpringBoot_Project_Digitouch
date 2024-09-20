@@ -7,8 +7,11 @@ import it.digitouch.videonoleggio.model.FilmNoleggioModel;
 import it.digitouch.videonoleggio.repository.FilmRepository;
 import it.digitouch.videonoleggio.repository.NoleggioRepository;
 import it.digitouch.videonoleggio.repository.FilmNoleggioRepository;
+
+import jakarta.validation.Valid;
+
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,7 +29,7 @@ public class FilmNoleggioController {
     private final FilmNoleggioRepository filmNoleggioRepository;
 
     @PostMapping("/collega")
-    public ResponseEntity<String> collegaFilmANoleggio(@RequestBody Map<String, Long> request) {
+    public ResponseEntity<String> collegaFilmANoleggio(@Valid @RequestBody Map<String, Long> request) {
         Long filmId = request.get("filmId");
         Long noleggioId = request.get("noleggioId");
 

@@ -1,75 +1,55 @@
 package it.digitouch.videonoleggio.service;
 
-import it.digitouch.videonoleggio.dto.FilmDTO;
-import it.digitouch.videonoleggio.dto.NoleggioDTO;;
+import it.digitouch.videonoleggio.dto.NoleggioDTO;
 import it.digitouch.videonoleggio.exception.ElementNotFoundException;
-import it.digitouch.videonoleggio.model.FilmModel;
+
 import it.digitouch.videonoleggio.model.NoleggioModel;
 import it.digitouch.videonoleggio.repository.NoleggioRepository;
+
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
+import org.springframework.stereotype.Service;
+import org.modelmapper.ModelMapper;
+
 import java.util.List;
 
 @Service
+@Data @Slf4j
 @RequiredArgsConstructor
-@Slf4j
-@Data
 public class NoleggioService {
 
     private final NoleggioRepository noleggioRepository;
 
+    private final ModelMapper modelMapper;
 
-    // GET ALL NOLEGGIO
+    //TODO GODURIA
+     /*************************************************************************************************************
+     *     UTILIZZO MODELMAPPER (ESTENZIONE MAVEN) per trasformare i dati da model a dto con stream e map         *
+     *         PRIMO DATO DI MAP PARTENA dopo la (,) dato a cui voglio arrivare                                   *
+     *************************************************************************************************************/
+
     public List<NoleggioDTO> getAllNoleggi() {
-        List<NoleggioModel> noleggiomodels = noleggioRepository.findAll();
-        List<NoleggioDTO> noleggioDTOS = new ArrayList<>();
-
-        for(NoleggioModel noleggioModel : noleggiomodels){
-            NoleggioDTO noleggioDTO = new NoleggioDTO(
-                    noleggioModel.getId(),
-                    noleggioModel.getNome(),
-                    noleggioModel.getTitolare(),
-                    noleggioModel.getCitta(),
-                    noleggioModel.getHashNoleggio()
-            );
-            noleggioDTOS.add(noleggioDTO);
-    }
-        return noleggioDTOS;
+    /**************************************************************************************************************
+    *              1) creo la list dei dati e la cerco nel DB                                                     *
+    *              2) trasfomo i model in dto e con stream e map mi faccio tornare la lista                       *
+    *               (con todoList trasformo la stream in lista)                                                   *
+    **************************************************************************************************************/
+        List<NoleggioModel> noleggioList = noleggioRepository.findAll();
+        return noleggioList.stream().map(((noleggio) -> modelMapper.map(noleggio, NoleggioDTO.class))).toList();
     }
 
     public NoleggioDTO saveNoleggio(NoleggioDTO noleggioDTO) {
-        NoleggioModel noleggioModel = new NoleggioModel(
-                noleggioDTO.getId(),
-                noleggioDTO.getNome(),
-                noleggioDTO.getTitolare(),
-                noleggioDTO.getCitta(),
-                noleggioDTO.getHashNoleggio()
-        );
-
-        NoleggioModel saveNoleggio = noleggioRepository.save(noleggioModel);
-        return new NoleggioDTO(
-                saveNoleggio.getId(),
-                saveNoleggio.getNome(),
-                saveNoleggio.getTitolare(),
-                saveNoleggio.getCitta(),
-                saveNoleggio.getHashNoleggio()
-        );
+        NoleggioModel noleggio = modelMapper.map(noleggioDTO, NoleggioModel.class);
+        noleggioRepository.save(noleggio);
+        return modelMapper.map(noleggio, NoleggioDTO.class);
     }
 
     public NoleggioDTO getNoleggioById(Long id) {
         NoleggioModel noleggioModel = noleggioRepository.findById(id)
                 .orElseThrow(() -> new ElementNotFoundException("noleggio non trovato"));
-        return new NoleggioDTO(
-                noleggioModel.getId(),
-                noleggioModel.getNome(),
-                noleggioModel.getTitolare(),
-                noleggioModel.getCitta(),
-                noleggioModel.getHashNoleggio()
-        );
+        return modelMapper.map(noleggioModel, NoleggioDTO.class);
     }
 
     public void deleteNoleggioById(Long id) {
@@ -77,34 +57,14 @@ public class NoleggioService {
     }
 
     public NoleggioDTO updateNoleggio(Long id, NoleggioDTO noleggioDTO){
-        NoleggioModel existingNoleggio = noleggioRepository.findById(id)
-                .orElseThrow(() -> new ElementNotFoundException("Noleggio non trovato"));
-        existingNoleggio.setNome(noleggioDTO.getNome());
-        existingNoleggio.setTitolare(noleggioDTO.getTitolare());
-        existingNoleggio.setCitta(noleggioDTO.getCitta());
-        existingNoleggio.setHashNoleggio(noleggioDTO.getHashNoleggio());
+        NoleggioModel noleggioModel = noleggioRepository.findById(id)
+                .orElseThrow(() -> new ElementNotFoundException("noleggio non trovato"));
+        noleggioModel.setNome(noleggioDTO.getNome());
+        noleggioModel.setTitolare(noleggioDTO.getTitolare());
+        noleggioModel.setCitta(noleggioDTO.getCitta());
+        noleggioModel.setHashNoleggio(noleggioDTO.getHashNoleggio());
 
-        noleggioRepository.save(existingNoleggio);
-        return converterToDTO(existingNoleggio);
+        noleggioRepository.save(noleggioModel);
+        return modelMapper.map(noleggioModel, NoleggioDTO.class);
     }
-
-
-    //TODO  per semplificare il codice basta scrivere una volta il converte
-private NoleggioDTO converterToDTO(NoleggioModel noleggioModel){
-        return new NoleggioDTO(
-                noleggioModel.getId(),
-                noleggioModel.getNome(),
-                noleggioModel.getCitta(),
-                noleggioModel.getCitta(),
-                noleggioModel.getHashNoleggio()
-        );
 }
-
-
-
-
-
-
-
-}
-
