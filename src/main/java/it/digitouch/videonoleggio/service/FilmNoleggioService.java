@@ -8,6 +8,7 @@ import it.digitouch.videonoleggio.repository.FilmNoleggioRepository;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -18,11 +19,14 @@ public class FilmNoleggioService {
 
     private final FilmNoleggioRepository filmNoleggioRepository;
 
-    public FilmNoleggioModel saveFilmNoleggio(FilmNoleggioDTO filmNoleggioDTO) {
+    private final ModelMapper modelMapper;
+
+    public FilmNoleggioDTO saveFilmNoleggio(FilmNoleggioDTO filmNoleggioDTO) {
         FilmNoleggioModel filmNoleggio = new FilmNoleggioModel();
         filmNoleggio.setFilm(new FilmModel(filmNoleggioDTO.getFilmId()));
         filmNoleggio.setNoleggio(new NoleggioModel(filmNoleggioDTO.getNoleggioId()));
-        return filmNoleggioRepository.save(filmNoleggio);
+        filmNoleggioRepository.save(filmNoleggio);
+        return modelMapper.map(filmNoleggio, FilmNoleggioDTO.class);
     }
 }
 

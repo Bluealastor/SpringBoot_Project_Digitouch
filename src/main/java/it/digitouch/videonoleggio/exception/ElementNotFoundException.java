@@ -2,10 +2,14 @@ package it.digitouch.videonoleggio.exception;
 
 import lombok.*;
 
-@Data
+
+@NoArgsConstructor
+@Getter @Setter
 public class ElementNotFoundException extends RuntimeException {
 
     private String message;
-    public ElementNotFoundException(String elementoNonTrovato) {
+
+    public ElementNotFoundException(String message) {
+        this.message = message;
     }
 }

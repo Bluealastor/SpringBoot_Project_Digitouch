@@ -63,28 +63,56 @@
 			<artifactId>hibernate-validator</artifactId>
 			<version>6.2.0.Final</version>
 		</dependency>
+		<!--*********************************************
+		 	MODEL MAPPER utile per mappare i DATI
+		 	usato per mappare model a DTO e viceversa
+		 *********************************************-->
 		<dependency>
 			<groupId>org.modelmapper</groupId>
 			<artifactId>modelmapper</artifactId>
 			<version>3.2.1</version>
 		</dependency>
+		<!--*************************************************-->
+
+		<!--*********************************************
+			    dipendenze usate per test unit
+		*********************************************-->
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-api</artifactId>
+			<version>5.11.0</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-junit-jupiter</artifactId>
+			<version>${mockito.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-inline</artifactId>
+			<version>5.2.0</version>
+			<scope>test</scope>
+		</dependency>
+		<!--*********************************************-->
 	</dependencies>
 
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-maven-plugin</artifactId>
-				<configuration>
-					<excludes>
-						<exclude>
-							<groupId>org.projectlombok</groupId>
-							<artifactId>lombok</artifactId>
-						</exclude>
-					</excludes>
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.springframework.boot</groupId>
+                        <artifactId>spring-boot-maven-plugin</artifactId>
+                        <configuration>
+                            <excludes>
+                                <exclude>
+                                    <groupId>org.projectlombok</groupId>
+                                    <artifactId>lombok</artifactId>
+                                </exclude>
+                            </excludes>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
 
-</project>
+        </project>

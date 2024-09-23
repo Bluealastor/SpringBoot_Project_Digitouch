@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.Data;
 
+import java.util.Base64;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -15,4 +17,9 @@ public class FilmDTO {
     private String genere;
     private String annouscita;
     private String hashFilm;
+
+    public String getHashFilm() {
+        String encode64 = nome + casaProduzione + genere + annouscita;
+        return Base64.getUrlEncoder().encodeToString(encode64.getBytes());
+    }
 }

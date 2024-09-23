@@ -1,6 +1,7 @@
 package it.digitouch.videonoleggio.service;
 
 import it.digitouch.videonoleggio.dto.FilmDTO;
+import it.digitouch.videonoleggio.exception.ElementAlreadyFoundException;
 import it.digitouch.videonoleggio.exception.ElementNotFoundException;
 import it.digitouch.videonoleggio.model.FilmModel;
 import it.digitouch.videonoleggio.repository.FilmRepository;
@@ -29,6 +30,9 @@ public class FilmService {
     }
 
     public FilmDTO saveFilm(FilmDTO filmDTO) {
+        filmRepository.findByhashFilm(filmDTO.getHashFilm()).ifPresent(film -> {
+            throw new ElementAlreadyFoundException("Un film con codice " + filmDTO.getHashFilm() + " esiste già.");
+        });
         FilmModel film = modelMapper.map(filmDTO, FilmModel.class);
         filmRepository.save(film);
         return modelMapper.map(film, FilmDTO.class);
@@ -36,7 +40,7 @@ public class FilmService {
 
     public FilmDTO getFilmById(Long id) {
         FilmModel filmModel = filmRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Film non trovato"));
+                .orElseThrow(() -> new ElementNotFoundException("Film "+ id + " Not Found"));
         return modelMapper.map(filmModel, FilmDTO.class);
     }
 
@@ -46,13 +50,18 @@ public class FilmService {
 
     public FilmDTO updateFilm(Long id, FilmDTO filmDTO) {    // Trova il film nel database
         FilmModel filmModel = filmRepository.findById(id)
-                .orElseThrow(() -> new ElementNotFoundException("Film non trovato"));
+                .orElseThrow(() -> new ElementNotFoundException("Film "+ id + " Not Found"));
         filmModel.setNome(filmDTO.getNome());
         filmModel.setCasaProduzione(filmDTO.getCasaProduzione());
         filmModel.setGenere(filmDTO.getGenere());
         filmModel.setAnnouscita(filmDTO.getAnnouscita());
         filmModel.setHashFilm(filmDTO.getHashFilm());
 
+        String newHash = filmModel.getHashFilm();
+        filmModel.setHashFilm(newHash);
+        filmRepository.findByhashFilm(filmDTO.getHashFilm()).ifPresent(film -> {
+            throw new ElementAlreadyFoundException("Un film con codice " + filmDTO.getHashFilm() + " esiste già.");
+        });
         // Salva il film aggiornato nel repository
         filmRepository.save(filmModel);
 

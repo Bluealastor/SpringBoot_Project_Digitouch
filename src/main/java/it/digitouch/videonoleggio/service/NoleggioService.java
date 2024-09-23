@@ -1,6 +1,7 @@
 package it.digitouch.videonoleggio.service;
 
 import it.digitouch.videonoleggio.dto.NoleggioDTO;
+import it.digitouch.videonoleggio.exception.ElementAlreadyFoundException;
 import it.digitouch.videonoleggio.exception.ElementNotFoundException;
 
 import it.digitouch.videonoleggio.model.NoleggioModel;
@@ -32,15 +33,18 @@ public class NoleggioService {
 
     public List<NoleggioDTO> getAllNoleggi() {
     /**************************************************************************************************************
-    *              1) creo la list dei dati e la cerco nel DB                                                     *
-    *              2) trasfomo i model in dto e con stream e map mi faccio tornare la lista                       *
-    *               (con todoList trasformo la stream in lista)                                                   *
+    *         1) creo la list dei dati e la cerco nel DB                                                          *
+    *        2) trasfomo i model in dto(ATTRAVERSO MODELMAPPER) e con stream e map mi faccio tornare la lista     *
+    *             (con todoList trasformo la stream in lista)                                                     *
     **************************************************************************************************************/
         List<NoleggioModel> noleggioList = noleggioRepository.findAll();
         return noleggioList.stream().map(((noleggio) -> modelMapper.map(noleggio, NoleggioDTO.class))).toList();
     }
 
     public NoleggioDTO saveNoleggio(NoleggioDTO noleggioDTO) {
+        noleggioRepository.findByHashNoleggio(noleggioDTO.getHashNoleggio()).ifPresent(noleggio -> {
+            throw new ElementAlreadyFoundException("Noleggio Con codice "+ noleggioDTO.getHashNoleggio() + " esiste già");
+        });
         NoleggioModel noleggio = modelMapper.map(noleggioDTO, NoleggioModel.class);
         noleggioRepository.save(noleggio);
         return modelMapper.map(noleggio, NoleggioDTO.class);
@@ -48,7 +52,7 @@ public class NoleggioService {
 
     public NoleggioDTO getNoleggioById(Long id) {
         NoleggioModel noleggioModel = noleggioRepository.findById(id)
-                .orElseThrow(() -> new ElementNotFoundException("noleggio non trovato"));
+                .orElseThrow(() -> new ElementNotFoundException("Noleggio: "+ id + " Not Found"));
         return modelMapper.map(noleggioModel, NoleggioDTO.class);
     }
 
@@ -58,7 +62,7 @@ public class NoleggioService {
 
     public NoleggioDTO updateNoleggio(Long id, NoleggioDTO noleggioDTO){
         NoleggioModel noleggioModel = noleggioRepository.findById(id)
-                .orElseThrow(() -> new ElementNotFoundException("noleggio non trovato"));
+                .orElseThrow(() -> new ElementNotFoundException("Noleggio: "+ id + " Not Found"));
         noleggioModel.setNome(noleggioDTO.getNome());
         noleggioModel.setTitolare(noleggioDTO.getTitolare());
         noleggioModel.setCitta(noleggioDTO.getCitta());
