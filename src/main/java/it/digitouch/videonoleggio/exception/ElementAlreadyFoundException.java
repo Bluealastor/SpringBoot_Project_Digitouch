@@ -1,12 +1,11 @@
 package it.digitouch.videonoleggio.exception;
 
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
+
+@Data
 @NoArgsConstructor
-@Getter
-@Setter
 public class ElementAlreadyFoundException extends RuntimeException{
 
     private String message;

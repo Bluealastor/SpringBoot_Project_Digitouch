@@ -37,7 +37,7 @@ public class NoleggioController {
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteFilm(@PathVariable Long id) {
         noleggioService.deleteNoleggioById(id);
-        return ResponseEntity.ok("Film eliminato con successo");
+        return ResponseEntity.ok("Noleggio eliminato con successo");
     }
 
     @PatchMapping("/{id}")

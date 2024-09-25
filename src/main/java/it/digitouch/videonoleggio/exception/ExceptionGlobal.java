@@ -24,7 +24,7 @@ public class ExceptionGlobal {
 
       @ExceptionHandler(ElementAlreadyFoundException.class)
       public ResponseEntity<ExceptionErrorMessage> AlreadyFoundException(ElementAlreadyFoundException exception){
-          return new ResponseEntity<>(new ExceptionErrorMessage("Elemento Già Esistente",exception.getMessage()), HttpStatus.CONFLICT);
+          return new ResponseEntity<>(new ExceptionErrorMessage("Element Already Found",exception.getMessage()), HttpStatus.FOUND);
       }
 
 

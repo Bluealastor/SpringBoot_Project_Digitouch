@@ -26,13 +26,12 @@ public class FilmService {
 
     public List<FilmDTO> getAllFilms() {
         List<FilmModel> filmList = filmRepository.findAll();
-        return filmList.stream().map(((film) -> modelMapper.map(film, FilmDTO.class))).toList();
+        return filmList.stream().map(film -> modelMapper.map(film, FilmDTO.class)).toList();
     }
 
     public FilmDTO saveFilm(FilmDTO filmDTO) {
-        filmRepository.findByhashFilm(filmDTO.getHashFilm()).ifPresent(film -> {
-            throw new ElementAlreadyFoundException("Un film con codice " + filmDTO.getHashFilm() + " esiste già.");
-        });
+        filmRepository.findByhashFilm(filmDTO.getHashFilm())
+                .orElseThrow(() -> new ElementNotFoundException("Film "+ filmDTO.getHashFilm() + " Esiste già"));
         FilmModel film = modelMapper.map(filmDTO, FilmModel.class);
         filmRepository.save(film);
         return modelMapper.map(film, FilmDTO.class);
@@ -48,7 +47,7 @@ public class FilmService {
         filmRepository.deleteById(id);
     }
 
-    public FilmDTO updateFilm(Long id, FilmDTO filmDTO) {    // Trova il film nel database
+    public FilmDTO updateFilm(Long id, FilmDTO filmDTO) {
         FilmModel filmModel = filmRepository.findById(id)
                 .orElseThrow(() -> new ElementNotFoundException("Film "+ id + " Not Found"));
         filmModel.setNome(filmDTO.getNome());
@@ -57,15 +56,10 @@ public class FilmService {
         filmModel.setAnnouscita(filmDTO.getAnnouscita());
         filmModel.setHashFilm(filmDTO.getHashFilm());
 
-        String newHash = filmModel.getHashFilm();
-        filmModel.setHashFilm(newHash);
-        filmRepository.findByhashFilm(filmDTO.getHashFilm()).ifPresent(film -> {
-            throw new ElementAlreadyFoundException("Un film con codice " + filmDTO.getHashFilm() + " esiste già.");
-        });
-        // Salva il film aggiornato nel repository
+        filmRepository.findByhashFilm(filmDTO.getHashFilm())
+                .orElseThrow(() -> new ElementAlreadyFoundException("Un film con codice " + filmDTO.getHashFilm() + " esiste già."));
         filmRepository.save(filmModel);
 
-        // Ritorna il film aggiornato come DTO
         return modelMapper.map(filmModel, FilmDTO.class);
     }
 }

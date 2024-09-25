@@ -2,6 +2,7 @@ package it.digitouch.videonoleggio.dto;
 
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.NoArgsConstructor;
 import lombok.Data;
 
@@ -10,6 +11,7 @@ import java.util.Base64;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class FilmDTO {
     private Long id;
     private String nome;
