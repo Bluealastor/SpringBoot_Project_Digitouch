@@ -15,6 +15,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
 import org.modelmapper.ModelMapper;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.Arrays;
 import java.util.Optional;
@@ -47,6 +48,7 @@ public class FilmServiceTest {
     void getAllFilm_ok(){
         FilmModel film1 = new FilmModel();
         FilmModel film2 = new FilmModel();
+
         var filmList = Arrays.asList(film1,film2);
         when(filmRepository.findAll()).thenReturn(filmList);
         // non puoi mappare ogni singolo elelemnto come nel service
@@ -105,7 +107,7 @@ public class FilmServiceTest {
     @Test
     void saveFilm_ok(){
         // indico le azioni da fare
-        when(filmRepository.findByhashFilm(ArgumentMatchers.any())).thenReturn(Optional.ofNullable(getFilmModel()));
+        when(filmRepository.findByhashFilm(ArgumentMatchers.any())).thenReturn(Optional.empty());
         when(modelMapper.map(ArgumentMatchers.any(), ArgumentMatchers.eq(FilmModel.class))).thenReturn(getFilmModel());
 
         when(filmRepository.save(ArgumentMatchers.any())).thenReturn(getFilmModel());
@@ -120,15 +122,17 @@ public class FilmServiceTest {
 
     @Test
     void saveFilm_ko(){
-        when(filmRepository.findByhashFilm(ArgumentMatchers.any())).thenReturn(Optional.ofNullable(getFilmModel()));
+        when(filmRepository.findByhashFilm(ArgumentMatchers.any())).thenReturn(Optional.empty());
         when(modelMapper.map(ArgumentMatchers.any(), ArgumentMatchers.eq(FilmModel.class))).thenReturn(getFilmModel());
 
         // Simula un'eccezione durante il salvataggio
-        when(filmRepository.save(ArgumentMatchers.any())).thenThrow(new RuntimeException("Errore durante il salvataggio"));
+        when(filmRepository.save(ArgumentMatchers.any()))
+                .thenThrow(new RuntimeException("Errore durante il salvataggio"));
 //      when(modelMapper.map(ArgumentMatchers.any(), ArgumentMatchers.eq(FilmDTO.class))).thenReturn(getFilmDto());
 
         // Verifica che venga lanciata l'eccezione attesa
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> filmService.saveFilm(getFilmDto()));
+        RuntimeException exception = assertThrows(RuntimeException.class,
+                () -> filmService.saveFilm(getFilmDto()));
         assertEquals("Errore durante il salvataggio", exception.getMessage());
     }
 
@@ -186,16 +190,19 @@ public class FilmServiceTest {
     @Test
     void deleteFilmById_ok(){
         filmService.deleteFilmById(2L);
-        // verify utilizzato per ferificare se il metodo viene chiamato
+        // verify utilizzato per verificare se il metodo viene chiamato
         // con times indico quante volte deve essere chiamate
         verify(filmRepository, times(1)).deleteById(2L);
     }
 
     @Test
     public void deleteFilmById_ko() {
-        // Arrange
+
         Long nonExistentFilmId = 1L;
-        // Simula il comportamento del repository
+
+        // RICORDA CHE l'errore viene inserito prima di eliminare
+        // NON DOPO CHE HA ESEGUITO L'ELIMINAZIONE
+        // SI UTILIZZA DOTHROW
         doThrow(new RuntimeException("Film not found")).when(filmRepository).deleteById(nonExistentFilmId);
 
         // Act & Assert
@@ -236,38 +243,30 @@ public class FilmServiceTest {
         existingFilmModel.setCasaProduzione("Vecchia Casa");
         existingFilmModel.setGenere("Drammatico");
         existingFilmModel.setAnnouscita("2020");
-        existingFilmModel.setHashFilm("oldHash");
 
-        // Configurazione del mock per trovare il film esistente
         when(filmRepository.findById(filmId)).thenReturn(Optional.of(existingFilmModel));
 
-        // Simuliamo che non esista già un film con lo stesso hash
 //        when(filmRepository.findByhashFilm(ArgumentMatchers.any())).thenReturn(Optional.empty());
-        when(filmRepository.findByhashFilm(ArgumentMatchers.any())).thenReturn(Optional.of(existingFilmModel));
+        when(filmRepository.findByhashFilm(ArgumentMatchers.any())).thenReturn(Optional.empty());
 
-        // Mappatura corretta dell'oggetto aggiornato
         when(modelMapper.map(existingFilmModel, FilmDTO.class)).thenReturn(filmDTO);
 
-        // Esegui l'aggiornamento
         FilmDTO updatedFilmDTO = filmService.updateFilm(filmId, filmDTO);
 
-        // Verifica che il DTO restituito non sia nullo
         assertNotNull(updatedFilmDTO);
 
-        // Verifica che il film esistente sia stato aggiornato
         assertEquals("Nuovo Nome", existingFilmModel.getNome());
         assertEquals("Nuova Casa", existingFilmModel.getCasaProduzione());
         assertEquals("Commedia", existingFilmModel.getGenere());
         assertEquals("2023", existingFilmModel.getAnnouscita());
-        assertEquals("TnVvdm8gTm9tZU51b3ZhIENhc2FDb21tZWRpYTIwMjM=", existingFilmModel.getHashFilm()); // Verifica il hashFilm generato
+        assertEquals("TnVvdm8gTm9tZU51b3ZhIENhc2FDb21tZWRpYTIwMjM=", existingFilmModel.getHashFilm());
 
-        // Verifica che il film sia stato salvato nel repository
         verify(filmRepository).save(existingFilmModel);
     }
 
     @Test
     void updateFilm_ko() {
-        Long filmId = 1L; // ID del film da aggiornare
+        Long filmId = 1L;
 
         // DTO con i nuovi valori
         FilmDTO filmDTO = new FilmDTO();
@@ -275,7 +274,6 @@ public class FilmServiceTest {
         filmDTO.setCasaProduzione("Nuova Casa");
         filmDTO.setGenere("Commedia");
         filmDTO.setAnnouscita("2023");
-        filmDTO.setHashFilm("hashCollision"); // Hash that will cause collision
 
         // FilmModel esistente
         FilmModel existingFilmModel = new FilmModel();
@@ -283,7 +281,6 @@ public class FilmServiceTest {
         existingFilmModel.setCasaProduzione("Vecchia Casa");
         existingFilmModel.setGenere("Drammatico");
         existingFilmModel.setAnnouscita("2020");
-        existingFilmModel.setHashFilm("oldHash");
 
         when(filmRepository.findById(filmId)).thenReturn(Optional.of(existingFilmModel));
 
@@ -292,12 +289,10 @@ public class FilmServiceTest {
         anotherFilmModel.setHashFilm(filmDTO.getHashFilm());
         when(filmRepository.findByhashFilm(ArgumentMatchers.any())).thenThrow(new ElementAlreadyFoundException("Un film con codice TnVvdm8gTm9tZU51b3ZhIENhc2FDb21tZWRpYTIwMjM= esiste già."));
 
-        // Verifica che l'eccezione venga lanciata
         Exception exception = assertThrows(ElementAlreadyFoundException.class, () -> {
             filmService.updateFilm(filmId, filmDTO);
         });
-//        assertEquals("Errore durante il salvataggio", exception.getMessage());
-        // Assert the exception message if necessary
+
         assertEquals("Un film con codice " + filmDTO.getHashFilm() + " esiste già.", exception.getMessage());
     }
 

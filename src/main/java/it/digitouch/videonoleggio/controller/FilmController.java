@@ -1,10 +1,13 @@
 package it.digitouch.videonoleggio.controller;
 
 import it.digitouch.videonoleggio.dto.FilmDTO;
+import it.digitouch.videonoleggio.model.FilmModel;
 import it.digitouch.videonoleggio.service.FilmService;
 import jakarta.validation.Valid;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -38,8 +41,23 @@ public class FilmController {
 
         @DeleteMapping("/{id}")
         public ResponseEntity<String> deleteFilm(@PathVariable Long id) {
-            filmService.deleteFilmById(id);
-            return ResponseEntity.ok("Film eliminato con successo");
+       try {
+           filmService.deleteFilmById(id);
+           return ResponseEntity.ok("Film eliminato con id: " + id);
+       }catch (EmptyResultDataAccessException e) {
+
+           return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Film non trovato con id: " + id);
+       }
+        }
+
+        @DeleteMapping("/delete/{hash}")
+        public ResponseEntity<String> deleteFilmByHash(@PathVariable String hash){
+            try {
+                filmService.deleFilmByHash(hash);
+                return ResponseEntity.ok("Film eliminato con hash: " + hash);
+            } catch (EmptyResultDataAccessException e) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Film non trovato con hash: " + hash);
+            }
         }
 
     @PatchMapping("/{id}")

@@ -6,6 +6,7 @@ import it.digitouch.videonoleggio.exception.ElementNotFoundException;
 import it.digitouch.videonoleggio.model.FilmModel;
 import it.digitouch.videonoleggio.repository.FilmRepository;
 
+import jakarta.transaction.Transactional;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +25,8 @@ public class FilmService {
 
     private final ModelMapper modelMapper;
 
+
+
     public List<FilmDTO> getAllFilms() {
         List<FilmModel> filmList = filmRepository.findAll();
         return filmList.stream().map(film -> modelMapper.map(film, FilmDTO.class)).toList();
@@ -31,7 +34,7 @@ public class FilmService {
 
     public FilmDTO saveFilm(FilmDTO filmDTO) {
         filmRepository.findByhashFilm(filmDTO.getHashFilm())
-                .orElseThrow(() -> new ElementNotFoundException("Film "+ filmDTO.getHashFilm() + " Esiste già"));
+                .ifPresent((film) -> {throw new ElementAlreadyFoundException("Film " + film.getHashFilm() + " esiste già");});
         FilmModel film = modelMapper.map(filmDTO, FilmModel.class);
         filmRepository.save(film);
         return modelMapper.map(film, FilmDTO.class);
@@ -47,6 +50,20 @@ public class FilmService {
         filmRepository.deleteById(id);
     }
 
+
+    /****************************************************************************************************************************************************************************
+    * jakarta.persistence.TransactionRequiredException: No EntityManager with actual transaction available for current thread - cannot reliably process 'remove' call           *
+    * Questo errore si verifica perché l'operazione di eliminazione (delete) richiede una transazione attiva,                                                                   *
+    * e l'EntityManager non è in un contesto transazionale.                                                                                                                     *
+    * In Spring, le operazioni JPA come la delete devono essere eseguite all'interno di una transazione,                                                                        *
+    *  e senza di essa si presenta questo problema.                                                                                                                             *
+    ****************************************************************************************************************************************************************************/
+    // aggiungere il transactional
+    @Transactional
+    public void deleFilmByHash(String hash){
+        filmRepository.deleteByHashFilm(hash);
+    }
+
     public FilmDTO updateFilm(Long id, FilmDTO filmDTO) {
         FilmModel filmModel = filmRepository.findById(id)
                 .orElseThrow(() -> new ElementNotFoundException("Film "+ id + " Not Found"));
@@ -57,7 +74,7 @@ public class FilmService {
         filmModel.setHashFilm(filmDTO.getHashFilm());
 
         filmRepository.findByhashFilm(filmDTO.getHashFilm())
-                .orElseThrow(() -> new ElementAlreadyFoundException("Un film con codice " + filmDTO.getHashFilm() + " esiste già."));
+                .ifPresent(film -> { throw new ElementAlreadyFoundException("Film " + filmDTO.getHashFilm() + " esiste già"); });
         filmRepository.save(filmModel);
 
         return modelMapper.map(filmModel, FilmDTO.class);

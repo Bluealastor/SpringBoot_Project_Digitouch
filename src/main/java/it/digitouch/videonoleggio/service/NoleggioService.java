@@ -6,6 +6,7 @@ import it.digitouch.videonoleggio.exception.ElementNotFoundException;
 import it.digitouch.videonoleggio.model.NoleggioModel;
 import it.digitouch.videonoleggio.repository.NoleggioRepository;
 
+import jakarta.transaction.Transactional;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -41,8 +42,7 @@ public class NoleggioService {
     }
 
     public NoleggioDTO saveNoleggio(NoleggioDTO noleggioDTO) {
-        noleggioRepository.findByhashNoleggio(noleggioDTO.getHashNoleggio())
-                .orElseThrow(() -> new ElementAlreadyFoundException("Noleggio Con codice "+ noleggioDTO.getHashNoleggio() + " esiste già"));
+        noleggioRepository.findByhashNoleggio(noleggioDTO.getHashNoleggio()) .ifPresent(film -> { throw new ElementAlreadyFoundException("Film " + noleggioDTO.getHashNoleggio() + " esiste già");});
         NoleggioModel noleggio = modelMapper.map(noleggioDTO, NoleggioModel.class);
         noleggioRepository.save(noleggio);
         return modelMapper.map(noleggio, NoleggioDTO.class);
@@ -58,6 +58,11 @@ public class NoleggioService {
         noleggioRepository.deleteById(id);
     }
 
+    @Transactional
+    public void deleteNoleggioByHash(String hash){
+        noleggioRepository.deleteByHashNoleggio(hash);
+    }
+
     public NoleggioDTO updateNoleggio(Long id, NoleggioDTO noleggioDTO){
         NoleggioModel noleggioModel = noleggioRepository.findById(id)
                 .orElseThrow(() -> new ElementNotFoundException("Noleggio: "+ id + " Not Found"));
@@ -67,7 +72,7 @@ public class NoleggioService {
         noleggioModel.setHashNoleggio(noleggioDTO.getHashNoleggio());
 
         noleggioRepository.findByhashNoleggio(noleggioDTO.getHashNoleggio())
-                .orElseThrow(() -> new ElementAlreadyFoundException("Noleggio Con codice "+ noleggioDTO.getHashNoleggio() + " esiste già"));
+                .ifPresent(film -> { throw new ElementAlreadyFoundException("Film " + noleggioDTO.getHashNoleggio() + " esiste già");});
         noleggioRepository.save(noleggioModel);
         return modelMapper.map(noleggioModel, NoleggioDTO.class);
     }

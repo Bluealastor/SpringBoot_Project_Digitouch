@@ -4,6 +4,8 @@ import it.digitouch.videonoleggio.dto.NoleggioDTO;
 import it.digitouch.videonoleggio.service.NoleggioService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -35,9 +37,23 @@ public class NoleggioController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteFilm(@PathVariable Long id) {
-        noleggioService.deleteNoleggioById(id);
-        return ResponseEntity.ok("Noleggio eliminato con successo");
+    public ResponseEntity<String> deletenoleggio(@PathVariable Long id) {
+        try {
+            noleggioService.deleteNoleggioById(id);
+            return ResponseEntity.ok("Noleggio eliminato con successo");
+        }catch (EmptyResultDataAccessException e){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Film non trovato con id: " + id);
+        }
+    }
+
+    @DeleteMapping("/delete/{hash}")
+    public ResponseEntity<String> deleteNoleggioByHash(@PathVariable String hash){
+        try {
+            noleggioService.deleteNoleggioByHash(hash);
+            return ResponseEntity.ok("Noleggio eliminato con successo");
+        }catch (EmptyResultDataAccessException e){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Film non trovato con id: " + hash);
+        }
     }
 
     @PatchMapping("/{id}")
