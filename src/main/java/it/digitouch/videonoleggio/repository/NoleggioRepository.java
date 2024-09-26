@@ -10,4 +10,5 @@ import java.util.Optional;
 @Repository
 public interface NoleggioRepository extends JpaRepository<NoleggioModel, Long>{
     Optional<NoleggioModel> findByhashNoleggio(String hashCode);
+    void deleteByHashNoleggio(String hashCode);
 }

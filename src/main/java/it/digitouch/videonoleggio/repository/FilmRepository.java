@@ -10,4 +10,5 @@ import java.util.Optional;
 public interface FilmRepository extends JpaRepository<FilmModel, Long> {
 
     Optional<FilmModel> findByhashFilm(String hashCode);
+    void deleteByHashFilm(String hasCode);
 }
