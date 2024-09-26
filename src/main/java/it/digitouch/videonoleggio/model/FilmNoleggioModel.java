@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
+@Builder
 @Table(name = "tc_film_noleggio")
 @Data
 @NoArgsConstructor
