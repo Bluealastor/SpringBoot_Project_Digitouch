@@ -1,6 +1,7 @@
 package it.digitouch.videonoleggio.controller;
 
 import it.digitouch.videonoleggio.dto.FilmDTO;
+import it.digitouch.videonoleggio.exception.ElementNotFoundException;
 import it.digitouch.videonoleggio.model.FilmModel;
 import it.digitouch.videonoleggio.service.FilmService;
 import jakarta.validation.Valid;
@@ -45,24 +46,27 @@ public class FilmController {
            filmService.deleteFilmById(id);
            return ResponseEntity.ok("Film eliminato con id: " + id);
        }catch (EmptyResultDataAccessException e) {
-
            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Film non trovato con id: " + id);
        }
         }
 
-        @DeleteMapping("/delete/{hash}")
-        public ResponseEntity<String> deleteFilmByHash(@PathVariable String hash){
-            try {
-                filmService.deleFilmByHash(hash);
-                return ResponseEntity.ok("Film eliminato con hash: " + hash);
-            } catch (EmptyResultDataAccessException e) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Film non trovato con hash: " + hash);
-            }
+    @DeleteMapping("/delete/{hash}")
+    public ResponseEntity<String> deleteFilmByHash(@PathVariable String hash) {
+        try {
+            filmService.deleFilmByHash(hash);
+            return ResponseEntity.ok("Film eliminato con successo");
+        } catch (ElementNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
+    }
 
     @PatchMapping("/{id}")
     public ResponseEntity<FilmDTO> updateFilm(@PathVariable Long id, @Valid @RequestBody FilmDTO filmDTO) {
         FilmDTO updatedFilm = filmService.updateFilm(id, filmDTO);
         return ResponseEntity.ok(updatedFilm);
     }
+
+
+
+    
     }

@@ -173,24 +173,23 @@ public class NolegioServiceTest {
      ********************************/
     @Test
     void deleteFilmById_ok(){
-        noleggioService.deleteNoleggioById(2L);
+        when(noleggioRepository.findById(ArgumentMatchers.anyLong())).thenReturn(Optional.of(getNoleggioModel()));
+        noleggioService.deleteNoleggioById(ArgumentMatchers.anyLong());
         // verify utilizzato per verificare se il metodo viene chiamato
         // con times indico quante volte deve essere chiamate
-        verify(noleggioRepository, times(1)).deleteById(2L);
+        verify(noleggioRepository, times(1)).deleteById(ArgumentMatchers.anyLong());
     }
 
     @Test
     public void deleteFilmById_ko() {
 
+        when(noleggioRepository.findById(ArgumentMatchers.anyLong())).thenReturn(Optional.empty());
 
-        doThrow(new ElementNotFoundException("Noleggio not found")).when(noleggioRepository).deleteById(ArgumentMatchers.anyLong());
-
-        // Act & Assert
         RuntimeException exception = assertThrows(RuntimeException.class, () -> {
             noleggioService.deleteNoleggioById(ArgumentMatchers.anyLong());
         });
 
-        assertEquals("Noleggio not found", exception.getMessage());
+        assertEquals("Noleggio con id: 0 non trovato", exception.getMessage());
     }
 
     /********************************

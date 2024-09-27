@@ -42,7 +42,8 @@ public class NoleggioService {
     }
 
     public NoleggioDTO saveNoleggio(NoleggioDTO noleggioDTO) {
-        noleggioRepository.findByhashNoleggio(noleggioDTO.getHashNoleggio()) .ifPresent(film -> { throw new ElementAlreadyFoundException("Film " + noleggioDTO.getHashNoleggio() + " esiste già");});
+        noleggioRepository.findByhashNoleggio(noleggioDTO.getHashNoleggio())
+                .ifPresent(film -> { throw new ElementAlreadyFoundException("Film " + noleggioDTO.getHashNoleggio() + " esiste già");});
         NoleggioModel noleggio = modelMapper.map(noleggioDTO, NoleggioModel.class);
         noleggioRepository.save(noleggio);
         return modelMapper.map(noleggio, NoleggioDTO.class);
@@ -55,11 +56,16 @@ public class NoleggioService {
     }
 
     public void deleteNoleggioById(Long id) {
+        noleggioRepository.findById(id)
+                .orElseThrow(() -> new ElementNotFoundException("Noleggio con id: " + id + " non trovato"));
+
         noleggioRepository.deleteById(id);
     }
 
     @Transactional
     public void deleteNoleggioByHash(String hash){
+        noleggioRepository.findByhashNoleggio(hash)
+                .orElseThrow(() -> new ElementNotFoundException("Noleggio con hash: " + hash + " non trovato"));
         noleggioRepository.deleteByHashNoleggio(hash);
     }
 

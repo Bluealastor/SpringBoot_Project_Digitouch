@@ -47,6 +47,8 @@ public class FilmService {
     }
 
     public void deleteFilmById(Long id) {
+        filmRepository.findById(id)
+                .orElseThrow(() -> new ElementNotFoundException("Film con hash " + id + " non trovato"));
         filmRepository.deleteById(id);
     }
 
@@ -61,6 +63,8 @@ public class FilmService {
     // aggiungere il transactional
     @Transactional
     public void deleFilmByHash(String hash){
+        filmRepository.findByhashFilm(hash)
+                .orElseThrow(() -> new ElementNotFoundException("Film con hash " + hash + " non trovato"));
         filmRepository.deleteByHashFilm(hash);
     }
 

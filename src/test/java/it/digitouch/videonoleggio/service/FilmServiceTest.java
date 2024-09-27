@@ -2,6 +2,7 @@ package it.digitouch.videonoleggio.service;
 
 import it.digitouch.videonoleggio.dto.FilmDTO;
 import it.digitouch.videonoleggio.exception.ElementAlreadyFoundException;
+import it.digitouch.videonoleggio.exception.ElementNotFoundException;
 import it.digitouch.videonoleggio.model.FilmModel;
 import it.digitouch.videonoleggio.repository.FilmRepository;
 
@@ -189,34 +190,63 @@ public class FilmServiceTest {
 
     @Test
     void deleteFilmById_ok(){
-        filmService.deleteFilmById(2L);
+        when(filmRepository.findById(ArgumentMatchers.anyLong())).thenReturn(Optional.of(getFilmModel()));
+        filmService.deleteFilmById(ArgumentMatchers.anyLong());
         // verify utilizzato per verificare se il metodo viene chiamato
         // con times indico quante volte deve essere chiamate
-        verify(filmRepository, times(1)).deleteById(2L);
+
+        verify(filmRepository, times(1)).deleteById(ArgumentMatchers.anyLong());
     }
 
     @Test
     public void deleteFilmById_ko() {
 
         Long nonExistentFilmId = 1L;
-
+        when(filmRepository.findById(nonExistentFilmId)).thenReturn(Optional.empty());
         // RICORDA CHE l'errore viene inserito prima di eliminare
         // NON DOPO CHE HA ESEGUITO L'ELIMINAZIONE
         // SI UTILIZZA DOTHROW
-        doThrow(new RuntimeException("Film not found")).when(filmRepository).deleteById(nonExistentFilmId);
+        //leniet() si utilizza per verificare se il metodo viene effettivamente chiamato
+//        lenient().doThrow(new RuntimeException("Film con hash 1 non trovato")).when(filmRepository).deleteById(nonExistentFilmId);
 
         // Act & Assert
         RuntimeException exception = assertThrows(RuntimeException.class, () -> {
             filmService.deleteFilmById(nonExistentFilmId);
         });
 
-        assertEquals("Film not found", exception.getMessage());
+        assertEquals("Film con hash 1 non trovato", exception.getMessage());
     }
 
 
     /********************************
      *   FINE TEST DELETE ID FILM   *
      ********************************/
+
+    /********************************************************************/
+
+    @Test
+    void deleFilmByHash_ok() {
+        when(filmRepository.findByhashFilm(ArgumentMatchers.anyString())).thenReturn(Optional.ofNullable(getFilmModel()));
+
+        filmService.deleFilmByHash(ArgumentMatchers.anyString());
+
+        verify(filmRepository, times(1)).deleteByHashFilm(ArgumentMatchers.anyString());
+    }
+
+
+    @Test
+    void deleFilmByHash_ko() {
+
+        when(filmRepository.findByhashFilm(ArgumentMatchers.anyString())).thenReturn(Optional.empty());
+
+        ElementNotFoundException exception = assertThrows(ElementNotFoundException.class, () -> {
+            filmService.deleFilmByHash(ArgumentMatchers.anyString());
+        });
+
+        assertEquals("Film con hash  non trovato", exception.getMessage());
+
+        verify(filmRepository, never()).deleteByHashFilm(ArgumentMatchers.anyString());
+    }
 
     /********************************************************************/
 

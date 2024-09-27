@@ -52,7 +52,7 @@ public class NoleggioController {
             noleggioService.deleteNoleggioByHash(hash);
             return ResponseEntity.ok("Noleggio eliminato con successo");
         }catch (EmptyResultDataAccessException e){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Film non trovato con id: " + hash);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Film non trovato con HashCode: " + hash);
         }
     }
 
