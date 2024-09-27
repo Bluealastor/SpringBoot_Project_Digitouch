@@ -12,9 +12,8 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 @Service
+@Slf4j @Data
 @RequiredArgsConstructor
-@Slf4j
-@Data
 public class FilmNoleggioService {
 
     private final FilmNoleggioRepository filmNoleggioRepository;

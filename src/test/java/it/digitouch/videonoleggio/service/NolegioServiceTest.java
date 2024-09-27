@@ -12,6 +12,7 @@ import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.stubbing.OngoingStubbing;
 import org.modelmapper.ModelMapper;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -165,6 +166,18 @@ public class NolegioServiceTest {
     /********************************
      *  FINE TEST GET ID NOLEGGIO   *
      ********************************/
+
+    @Test
+    void deleteFilmByHash_ok(){
+        var optionalOngoingStubbing = when(noleggioRepository.findByhashNoleggio(ArgumentMatchers.anyString())).thenReturn(Optional.of(getNoleggioModel()));
+        noleggioService.deleteNoleggioByHash(ArgumentMatchers.anyString());
+        // verify utilizzato per verificare se il metodo viene chiamato
+        // con times indico quante volte deve essere chiamate
+        verify(noleggioRepository, times(1)).deleteByHashNoleggio(ArgumentMatchers.anyString());
+
+    }
+
+
 
     /************************************************************************************/
 
