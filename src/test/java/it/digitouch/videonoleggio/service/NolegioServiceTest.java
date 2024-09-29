@@ -15,6 +15,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.OngoingStubbing;
 import org.modelmapper.ModelMapper;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.util.Arrays;
 import java.util.List;
@@ -95,21 +99,33 @@ public class NolegioServiceTest {
      *********************************/
     @Test
     void getAllNoleggi_ok() {
+        // Noleggi di esempio
         NoleggioModel noleggio1 = new NoleggioModel();
         NoleggioModel noleggio2 = new NoleggioModel();
 
-        var noleggioList = Arrays.asList(noleggio1, noleggio2);
+        // Lista di noleggi
+        List<NoleggioModel> noleggioList = Arrays.asList(noleggio1, noleggio2);
 
-        when(noleggioRepository.findAll()).thenReturn(noleggioList);
+        // Configura il Pageable e la pagina
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<NoleggioModel> noleggioPage = new PageImpl<>(noleggioList, pageable, noleggioList.size());
 
+        // Configurazione del mock per restituire la pagina
+        when(noleggioRepository.findAll(pageable)).thenReturn(noleggioPage);
+
+        // Configura il mapper per mappare ogni NoleggioModel a NoleggioDTO
         when(modelMapper.map(noleggio1, NoleggioDTO.class)).thenReturn(getNoleggioDTO());
         when(modelMapper.map(noleggio2, NoleggioDTO.class)).thenReturn(getNoleggioDTO());
 
-        var result = noleggioService.getAllNoleggi();
+        // Esegui il metodo con paginazione
+        List<NoleggioDTO> result = noleggioService.getAllNoleggi(pageable);
 
-        assertNotNull(result);
-        assertEquals(2, result.size());
+        // Verifica che la pagina sia stata restituita correttamente
+        verify(noleggioRepository, times(1)).findAll(pageable);
 
+        // Verifiche
+        assertNotNull(result);  // Verifica che il risultato non sia null
+        assertEquals(2, result.size());  // Verifica che la dimensione sia corretta
     }
 
 
@@ -117,15 +133,24 @@ public class NolegioServiceTest {
     void getAllNoleggi_ko() {
         NoleggioModel noleggio1 = new NoleggioModel();
         NoleggioModel noleggio2 = new NoleggioModel();
-        var noleggioList = Arrays.asList(noleggio1, noleggio2);
+        List<NoleggioModel> noleggioList = Arrays.asList(noleggio1, noleggio2);
 
-        when(noleggioRepository.findAll()).thenReturn(noleggioList);
+        // Configura il Pageable e la pagina
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<NoleggioModel> noleggioPage = new PageImpl<>(noleggioList, pageable, noleggioList.size());
+
+        // Configurazione del mock per restituire la pagina
+        when(noleggioRepository.findAll(pageable)).thenReturn(noleggioPage);
+
         when(modelMapper.map(noleggio1, NoleggioDTO.class)).thenThrow(new RuntimeException("Mapping Error"));
 
-        Exception exception = assertThrows(RuntimeException.class, () -> noleggioService.getAllNoleggi());
+        Exception exception = assertThrows(RuntimeException.class, () -> {
+            noleggioService.getAllNoleggi(pageable);
+        });
 
         assertEquals("Mapping Error", exception.getMessage());
-        verify(noleggioRepository).findAll();
+
+        verify(noleggioRepository).findAll(pageable);
     }
 
     /********************************

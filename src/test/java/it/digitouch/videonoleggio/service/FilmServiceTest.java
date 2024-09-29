@@ -17,8 +17,13 @@ import org.mockito.Mock;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -46,25 +51,26 @@ public class FilmServiceTest {
     *********************************/
 
     @Test
-    void getAllFilm_ok(){
+    void getAllFilm_ok() {
+        // Film di esempio
         FilmModel film1 = new FilmModel();
         FilmModel film2 = new FilmModel();
 
-        var filmList = Arrays.asList(film1,film2);
-        when(filmRepository.findAll()).thenReturn(filmList);
-        // non puoi mappare ogni singolo elelemnto come nel service
-        //when(filmList.stream().map(film -> modelMapper.map(film, FilmDTO.class)).toList()).thenReturn(filmListDto);
-        // solo singolarmente
+        List<FilmModel> filmList = Arrays.asList(film1, film2);
+
+        // Crea un Pageable per la pagina richiesta
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<FilmModel> filmPage = new PageImpl<>(filmList, pageable, filmList.size());
+
+
+        when(filmRepository.findAll(pageable)).thenReturn(filmPage);
+
         when(modelMapper.map(film1, FilmDTO.class)).thenReturn(getFilmDto());
         when(modelMapper.map(film2, FilmDTO.class)).thenReturn(getFilmDto());
 
-        var ritornoFilms = filmService.getAllFilms();
+        List<FilmDTO> ritornoFilms = filmService.getAllFilms(pageable);
 
-        // verifica che non ritorni un valore vuoto
         assertNotNull(ritornoFilms);
-        // assertEquals Accetta dei numeri
-        // primo è il valore ATTESO
-        // il secondo il valore da testare
         assertEquals(2, ritornoFilms.size());
     }
 
@@ -72,25 +78,26 @@ public class FilmServiceTest {
     void getAllFilm_ko() {
         FilmModel film1 = new FilmModel();
         FilmModel film2 = new FilmModel();
-        var filmList = Arrays.asList(film1, film2);
 
-        // Configurazione del mock per restituire la lista di FilmModel
-        when(filmRepository.findAll()).thenReturn(filmList);
+        List<FilmModel> filmList = Arrays.asList(film1, film2);
 
-        // Simuliamo un errore nel mapping per il secondo film
+        // Crea un Pageable per la pagina richiesta
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<FilmModel> filmPage = new PageImpl<>(filmList, pageable, filmList.size());
+
+        // Configurazione del mock per restituire la pagina
+        when(filmRepository.findAll(pageable)).thenReturn(filmPage);
+
         when(modelMapper.map(film1, FilmDTO.class)).thenReturn(getFilmDto());
         when(modelMapper.map(film2, FilmDTO.class)).thenThrow(new RuntimeException("Mapping Error"));
 
-        // Act & Assert
         Exception exception = assertThrows(RuntimeException.class, () -> {
-            filmService.getAllFilms();
+            filmService.getAllFilms(pageable);
         });
 
-        // Verifica che il messaggio dell'eccezione sia corretto
         assertEquals("Mapping Error", exception.getMessage());
 
-        // Assicuriamoci che il metodo findAll sia stato chiamato
-        verify(filmRepository).findAll();
+        verify(filmRepository).findAll(pageable);
     }
 
 
