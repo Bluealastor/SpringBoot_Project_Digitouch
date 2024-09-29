@@ -11,6 +11,8 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.modelmapper.ModelMapper;
 
@@ -27,9 +29,9 @@ public class FilmService {
 
 
 
-    public List<FilmDTO> getAllFilms() {
-        List<FilmModel> filmList = filmRepository.findAll();
-        return filmList.stream().map(film -> modelMapper.map(film, FilmDTO.class)).toList();
+    public List<FilmDTO> getAllFilms(Pageable pageable) {
+        Page<FilmModel> filmPage = filmRepository.findAll(pageable);
+        return filmPage.stream().map(film -> modelMapper.map(film, FilmDTO.class)).toList();
     }
 
     public FilmDTO saveFilm(FilmDTO filmDTO) {

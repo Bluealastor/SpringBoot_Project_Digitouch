@@ -5,6 +5,8 @@ import it.digitouch.videonoleggio.service.NoleggioService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,8 +22,13 @@ public class NoleggioController {
 
     //TODO GODO PARTE 2
     @GetMapping()
-    public ResponseEntity<List<NoleggioDTO>> getAllNoleggi(){
-        return ResponseEntity.ok(noleggioService.getAllNoleggi()) ;
+    public ResponseEntity<List<NoleggioDTO>> getAllNoleggi(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        Pageable pageable = PageRequest.of(page, size);
+        List<NoleggioDTO> noleggi = noleggioService.getAllNoleggi(pageable);
+        return ResponseEntity.ok(noleggi);
     }
 
     @PostMapping()

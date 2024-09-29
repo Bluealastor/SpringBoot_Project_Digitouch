@@ -11,6 +11,8 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.modelmapper.ModelMapper;
 
@@ -31,14 +33,16 @@ public class NoleggioService {
      *         PRIMO DATO DI MAP PARTENA dopo la (,) dato a cui voglio arrivare                                   *
      *************************************************************************************************************/
 
-    public List<NoleggioDTO> getAllNoleggi() {
+    public List<NoleggioDTO> getAllNoleggi(Pageable pageable) {
     /**************************************************************************************************************
     *         1) creo la list dei dati e la cerco nel DB                                                          *
     *        2) trasfomo i model in dto(ATTRAVERSO MODELMAPPER) e con stream e map mi faccio tornare la lista     *
     *             (con todoList trasformo la stream in lista)                                                     *
     **************************************************************************************************************/
-        List<NoleggioModel> noleggioList = noleggioRepository.findAll();
-        return noleggioList.stream().map(((noleggio) -> modelMapper.map(noleggio, NoleggioDTO.class))).toList();
+        Page<NoleggioModel> noleggioPage = noleggioRepository.findAll(pageable);
+        return noleggioPage.stream()
+                .map(noleggio -> modelMapper.map(noleggio, NoleggioDTO.class))
+                .toList();
     }
 
     public NoleggioDTO saveNoleggio(NoleggioDTO noleggioDTO) {
