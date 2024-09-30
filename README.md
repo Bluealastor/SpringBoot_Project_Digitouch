@@ -14,7 +14,6 @@ L'adozione di Spring Boot consente uno sviluppo rapido di applicazioni Java, men
 
 ### 2.1 Obiettivi del Progetto
 - Creare un'applicazione RESTful che gestisca le operazioni CRUD (Create, Read, Update, Delete) su una risorsa definita.
-- Implementare un'architettura a microservizi (se necessario) utilizzando Spring Boot.
 - Integrare JPA per la persistenza dei dati.
 - Scrivere test unitari e test di integrazione utilizzando JUnit e Mockito.
 
