@@ -78,9 +78,6 @@ Il progetto sarà organizzato come segue:
 - **Test di unità**: Scrivere test per il servizio utilizzando JUnit e Mockito. Utilizzare Mockito per simulare le dipendenze e testare i metodi.
 - **Test di integrazione**: Creare test per verificare il comportamento dell'intera applicazione, inclusa la persistenza dei dati.
 
-## 5. Conclusione
-Questo progetto fornisce un'opportunità pratica per esplorare e applicare le tecnologie Java Spring Boot, Mockito e JUnit. Attraverso lo sviluppo di un'applicazione web
-
 ---
 
 ## IN PROGRESS SWAGGER
