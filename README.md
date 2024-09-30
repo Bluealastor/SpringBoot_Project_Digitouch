@@ -1,6 +1,4 @@
-Capisco, vuoi un documento di progetto focalizzato sull'implementazione di un'applicazione utilizzando Java Spring Boot, Mockito e JUnit, senza riferimenti a un corso di formazione. Ecco un esempio di documento di progetto in questo senso:
 
----
 
 # Documento di Progetto: Sviluppo di un’Applicazione con Java Spring Boot, Mockito e JUnit
 
